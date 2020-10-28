@@ -3,47 +3,49 @@
 # usage
 
 <h3>step 1</h3>
+
 # Add it in your root build.gradle at the end of repositories:
 
- allprojects {
+  
+  
+ 	 allprojects {
 		repositories {
 			maven { url 'https://jitpack.io' }
 		}
 	}
+	
   
- Step 2. Add the dependency
+# Step 2. Add the dependency
  
- dependencies {
+	 dependencies {
 	        implementation 'com.github.JorbyPradhan.VideoPlayer:mkvideoplayer:0.1.0'
-	}
+		}
 
 # In manifests 
- <activity android:name=".WatchMovieActivity"
-    android:configChanges="keyboardHidden|orientation|screenSize"
-    android:screenOrientation="sensor"
-		 android:theme="@style/AppTheme.NoActionBar">
+     <activity android:name=".WatchMovieActivity"
+   	 android:configChanges="keyboardHidden|orientation|screenSize"
+   	 android:screenOrientation="sensor"
+	 android:theme="@style/AppTheme.NoActionBar">
 
 # In layout
-#
- <?xml version="1.0" encoding="utf-8"?> <br/>
+    <?xml version="1.0" encoding="utf-8"?> <br/>
  
- <androidx.constraintlayout.widget.ConstraintLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"  
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".WatchMovieActivity"> <br/>
+    <androidx.constraintlayout.widget.ConstraintLayout 
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"  
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      tools:context=".WatchMovieActivity"> 
     
     <include
         layout="@layout/mk_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 	
-	
- </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 # In activity
 
- player = new MKPlayer(this); <br/>
-        player.play("url");
+	 player = new MKPlayer(this); <br/>
+         player.play("url");
