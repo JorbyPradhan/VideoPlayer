@@ -28,7 +28,7 @@
 	 android:theme="@style/AppTheme.NoActionBar">
 
 # In layout
-    <?xml version="1.0" encoding="utf-8"?> <br/>
+    <?xml version="1.0" encoding="utf-8"?>
  
     <androidx.constraintlayout.widget.ConstraintLayout 
       xmlns:android="http://schemas.android.com/apk/res/android"
@@ -47,5 +47,5 @@
 
 # In activity
 
-	 player = new MKPlayer(this); <br/>
+	 player = new MKPlayer(this); 
          player.play("url");
