@@ -1,0 +1,4 @@
+include ':libraries:mkvideoplayer'
+include ':libraries:ijkplayer-java'
+include ':app'
+rootProject.name = "VideoPlayer"
