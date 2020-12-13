@@ -18,7 +18,10 @@
 # Step 2. Add the dependency
  
 	 dependencies {
-	        implementation 'com.github.JorbyPradhan.VideoPlayer:mkvideoplayer:0.1.0'
+	        implementation 'com.github.JorbyPradhan.VideoPlayer:mkvideoplayer:0.2.0'
+		//or
+		implementation 'com.github.JorbyPradhan.VideoPlayer:mkvideoplayer:0.2.0'
+		implementation 'com.github.JorbyPradhan.VideoPlayer:ijkplayer-java:0.2.0'
 		}
 
 # In manifests 
