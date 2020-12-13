@@ -15,6 +15,7 @@
  */
 package com.khizar1556.mkvideoplayer;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -153,13 +154,13 @@ public class MKPlayer {
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                             | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                             | View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        } else {
-           /* ((AppCompatActivity) activity).getWindow().getDecorView().setSystemUiVisibility(
+        } /*else {
+           *//* ((AppCompatActivity) activity).getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);*/
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);*//*
 
-        }
+        }*/
     }
 
     private boolean isShowing;
@@ -413,14 +414,12 @@ public class MKPlayer {
                         statusChange(STATUS_LOADING);
                         break;
                     case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
+                    case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                         statusChange(STATUS_PLAYING);
                         break;
                     case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
                         //显示 下载速度
 //                        Toaster.show("download rate:" + extra);
-                        break;
-                    case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
-                        statusChange(STATUS_PLAYING);
                         break;
                 }
                 onInfoListener.onInfo(what, extra);
@@ -447,7 +446,7 @@ public class MKPlayer {
         final GestureDetector gestureDetector = new GestureDetector(activity, new PlayerGestureListener());
 
 
-        View liveBox = activity.findViewById(R.id.app_video_box);
+        @SuppressLint("CutPasteId") View liveBox = activity.findViewById(R.id.app_video_box);
         liveBox.setClickable(true);
         liveBox.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -681,6 +680,7 @@ public class MKPlayer {
         void onPreviousClick();
     }
 
+    @SuppressLint("DefaultLocale")
     private String generateTime(long time) {
         int totalSeconds = (int) (time / 1000);
         int seconds = totalSeconds % 60;
@@ -702,9 +702,6 @@ public class MKPlayer {
                 (rotation == Surface.ROTATION_90
                         || rotation == Surface.ROTATION_270) && width > height) {
             switch (rotation) {
-                case Surface.ROTATION_0:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-                    break;
                 case Surface.ROTATION_90:
                     orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
                     break;
@@ -716,6 +713,7 @@ public class MKPlayer {
                     orientation =
                             ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
                     break;
+                case Surface.ROTATION_0:
                 default:
                     orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                     break;
@@ -725,9 +723,6 @@ public class MKPlayer {
         // is square:
         else {
             switch (rotation) {
-                case Surface.ROTATION_0:
-                    orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-                    break;
                 case Surface.ROTATION_90:
                     orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                     break;
@@ -739,6 +734,7 @@ public class MKPlayer {
                     orientation =
                             ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
                     break;
+                case Surface.ROTATION_0:
                 default:
                     orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
                     break;
@@ -784,14 +780,39 @@ public class MKPlayer {
         $.id(R.id.app_video_volume).text(s).visible();
     }
 
+    private void onDoubleTabClick(long percent){
+        long position = videoView.getCurrentPosition();
+        long duration = videoView.getDuration();
+       // long deltaMax = Math.min(100 * 1000, duration - position);
+      //  long delta = (long) (deltaMax * percent);
+        //long delta = (long) percent;
+        //Log.i("James", "onDoubleTapClicked: "+ delta + "Max" + deltaMax);
+        newPosition = percent + position;
+        if (newPosition > duration){
+            newPosition = duration;
+        }else if (newPosition<= 0){
+            newPosition = 0;
+            percent = -position;
+        }
+        int showDelta = (int) percent / 1000;
+        if (showDelta != 0) {
+            $.id(R.id.app_video_fastForward_box).visible();
+            String text = showDelta > 0 ? ("+" + showDelta) : "" + showDelta;
+            $.id(R.id.app_video_fastForward).text(text + "s");
+            $.id(R.id.app_video_fastForward_target).text(generateTime(newPosition) + "/");
+            $.id(R.id.app_video_fastForward_all).text(generateTime(duration));
+        }
+
+    }
     private void onProgressSlide(float percent) {
         long position = videoView.getCurrentPosition();
         long duration = videoView.getDuration();
         long deltaMax = Math.min(100 * 1000, duration - position);
         long delta = (long) (deltaMax * percent);
 
+        Log.i("James", "onDoubleTapClicked: "+ delta + "Max" + position);
+        newPosition = 10000 + position;
 
-        newPosition = delta + position;
         if (newPosition > duration) {
             newPosition = duration;
         } else if (newPosition <= 0) {
@@ -1046,23 +1067,43 @@ public class MKPlayer {
 
     public class PlayerGestureListener extends GestureDetector.SimpleOnGestureListener {
         private boolean firstTouch;
-        private boolean volumeControl;
+        private boolean doubleTouch;
+        private short volumeControl = 0;
         private boolean toSeek;
 
         /**
          * 双击
          */
-        /*@Override
+       /* @Override
         public boolean onDoubleTap(MotionEvent e) {
             videoView.toggleAspectRatio();
             return true;
-        }
-*/
+        }*/
         @Override
         public boolean onDown(MotionEvent e) {
             firstTouch = true;
             return super.onDown(e);
 
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            doubleTouch = true;
+            int deltaX =(int) (e.getX()*10)/videoView.getWidth();
+           // Log.i(TAG, "onDoubleTap: ");
+            Log.i("James", "onDoubleTap: "+ deltaX);
+
+                if (!isLive) {
+                    if (deltaX <= 2) {
+                        onDoubleTabClick(-10000);
+                       // onProgressSlide(-10.0f);
+                    } else if(deltaX >= 7) {
+                        onDoubleTabClick(10000);
+                        //onProgressSlide(10000);
+                    }
+                }
+
+            return super.onDoubleTap(e);
         }
 
         /**
@@ -1072,22 +1113,37 @@ public class MKPlayer {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             float mOldX = e1.getX(), mOldY = e1.getY();
             float deltaY = mOldY - e2.getY();
-            float deltaX = mOldX - e2.getX();
+           // float deltaX = mOldX - e2.getX();
+            int deltaX =(int) (mOldX*10)/videoView.getWidth();
             if (firstTouch) {
                 toSeek = Math.abs(distanceX) >= Math.abs(distanceY);
-                volumeControl = mOldX > screenWidthPixels * 0.5f;
+                if (deltaX <= 2){
+                    volumeControl = 1;
+                }else if (deltaX >= 7){
+                    volumeControl = 2;
+                }else {
+                    volumeControl = 0;
+                }
+              //  volumeControl = mOldX > screenWidthPixels * 0.5f;
+                Log.i("James", "onScroll Volume: "+ volumeControl + "Old"+mOldX+ "delta"+deltaX + "Pix"+screenWidthPixels * 0.5f);
                 firstTouch = false;
             }
+          /*  if (doubleTouch){
+                toSeek = Math.abs(distanceX) >= Math.abs(distanceY);
+                doubleTouch = false;
+            }*/
 
             if (toSeek) {
-                if (!isLive) {
-                    onProgressSlide(-deltaX / videoView.getWidth());
-                }
+               /* if (!isLive) {
+                    onProgressSlide(-(deltaX*10)/videoView.getWidth());
+                    Log.i("James", "onScroll: "+ deltaX);
+                    //onProgressSlide(-deltaX / videoView.getWidth());
+                }*/
             } else {
                 float percent = deltaY / videoView.getHeight();
-                if (volumeControl) {
+                if (volumeControl == 2) {
                     onVolumeSlide(percent);
-                } else {
+                } else if (volumeControl == 1){
                     onBrightnessSlide(percent);
                 }
 
@@ -1129,7 +1185,7 @@ public class MKPlayer {
      * @return
      */
     public boolean isPlaying() {
-        return videoView != null ? videoView.isPlaying() : false;
+        return videoView != null && videoView.isPlaying();
     }
 
     public void stop() {
