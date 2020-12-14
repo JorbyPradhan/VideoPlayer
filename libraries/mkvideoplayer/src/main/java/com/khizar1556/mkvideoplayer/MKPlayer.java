@@ -490,6 +490,7 @@ public class MKPlayer {
         initHeight = activity.findViewById(R.id.app_video_box).getLayoutParams().height;
         hideAll();
         if (!playerSupport) {
+            $.id(R.id.app_video_loading).visible();
             showStatus(activity.getResources().getString(R.string.not_support));
         }
     }
